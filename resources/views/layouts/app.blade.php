@@ -65,7 +65,7 @@ tailwind.config = {
 <style>
 /* 1. Desktop Liquid Glass */
 .liquid-nav-container{position:relative;background:rgba(246,242,240,.65);border:1px solid rgba(220,212,210,.85);box-shadow:inset 0 1px 2px rgba(0,0,0,.04),0 2px 8px rgba(88,0,20,.03)}
-.liquid-glass-pill{position:absolute;border-radius:.75rem;pointer-events:none;background:linear-gradient(135deg,rgba(255,255,255,.96) 0%,rgba(255,255,255,.72) 100%);backdrop-filter:blur(16px) saturate(190%);-webkit-backdrop-filter:blur(16px) saturate(190%);border:1px solid #fff;box-shadow:0 4px 14px -1px rgba(122,21,38,.12),0 2px 6px -1px rgba(0,0,0,.04),inset 0 1px 2px #fff,inset 0 -1px 2px rgba(122,21,38,.05);transition:left .38s cubic-bezier(.22,1,.36,1),top .38s cubic-bezier(.22,1,.36,1),width .38s cubic-bezier(.22,1,.36,1),height .38s cubic-bezier(.22,1,.36,1),transform .22s ease,opacity .25s ease;z-index:1}
+.liquid-glass-pill{position:absolute;border-radius:.75rem;pointer-events:none;background:linear-gradient(135deg,rgba(255,255,255,.96) 0%,rgba(255,255,255,.72) 100%);backdrop-filter:blur(16px) saturate(190%);-webkit-backdrop-filter:blur(16px) saturate(190%);border:1px solid #fff;box-shadow:0 4px 14px -1px rgba(122,21,38,.12),0 2px 6px -1px rgba(0,0,0,.04),inset 0 1px 2px #fff,inset 0 -1px 2px rgba(122,21,38,.05);transition:left .4s cubic-bezier(.22,1,.36,1),top .4s cubic-bezier(.22,1,.36,1),width .4s cubic-bezier(.22,1,.36,1),height .4s cubic-bezier(.22,1,.36,1),transform .22s ease,opacity .25s ease;z-index:1}
 .liquid-glass-pill::before{content:'';position:absolute;inset:1px;border-radius:.75rem;background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,rgba(255,255,255,.12) 60%);pointer-events:none}
 .liquid-glass-pill.is-morphing{transform:scaleX(1.05) scaleY(.95)}
 
@@ -106,58 +106,10 @@ tailwind.config = {
 #mobile-bottom-sheet {
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
 }
-
-/* 4. Page Slide Transitions & Top Progress Bar */
-#page-progress-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 3px;
-  width: 0%;
-  background: linear-gradient(90deg, #580014 0%, #e9c349 50%, #7a1526 100%);
-  z-index: 9999;
-  transition: width 0.22s cubic-bezier(0.2, 0.8, 0.4, 1), opacity 0.25s ease;
-  opacity: 0;
-  pointer-events: none;
-  box-shadow: 0 0 10px rgba(233, 195, 73, 0.7);
-}
-
-#page-wrapper {
-  transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.24s ease;
-  will-change: transform, opacity;
-}
-
-.slide-out-left {
-  transform: translateX(-36px);
-  opacity: 0;
-}
-
-.slide-out-right {
-  transform: translateX(36px);
-  opacity: 0;
-}
-
-.slide-in-left {
-  transform: translateX(-36px);
-  opacity: 0;
-}
-
-.slide-in-right {
-  transform: translateX(36px);
-  opacity: 0;
-}
-
-.slide-active {
-  transform: translateX(0);
-  opacity: 1;
-}
 </style>
 @stack('head')
 </head>
 <body class="bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-secondary-fixed selection:text-primary">
-
-<!-- TOP PROGRESS BAR SAAT PERPINDAHAN HALAMAN -->
-<div id="page-progress-bar" aria-hidden="true"></div>
 
 <!-- HEADER UTAMA -->
 <header class="fixed top-0 w-full z-50 bg-surface/95 backdrop-blur-md shadow-[0_2px_12px_rgba(88,0,20,0.06)] border-b border-outline-variant/30">
@@ -444,11 +396,9 @@ tailwind.config = {
   </nav>
 </div>
 
-<!-- KONTEN HALAMAN DENGAN ANIMASI GESER -->
-<main class="w-full pt-16 sm:pt-20 pb-24 xl:pb-0 bg-surface min-h-screen overflow-x-hidden">
-  <div id="page-wrapper" class="w-full slide-active">
-    @yield('content')
-  </div>
+<!-- KONTEN HALAMAN -->
+<main class="w-full pt-16 sm:pt-20 pb-24 xl:pb-0 bg-surface min-h-screen">
+  @yield('content')
 </main>
 
 <!-- FOOTER HALAMAN -->
@@ -511,14 +461,12 @@ document.addEventListener('DOMContentLoaded', function () {
   // ==============================================================
   const nav = document.getElementById('main-nav');
   const pill = document.getElementById('liquid-glass-pill');
-  let moveToLink = null;
-
   if (nav && pill) {
     const links = Array.from(nav.querySelectorAll('.nav-glass-link'));
-    let activeLink = links.find(l => l.dataset.section === nav.dataset.active) || null;
+    const activeLink = links.find(l => l.dataset.section === nav.dataset.active) || null;
     let morphTimeout = null;
 
-    moveToLink = function (target) {
+    function moveToLink(target) {
       if (!target) return;
       pill.classList.add('is-morphing');
       clearTimeout(morphTimeout);
@@ -539,19 +487,23 @@ document.addEventListener('DOMContentLoaded', function () {
         l.classList.toggle('text-on-surface-variant', !on);
         l.classList.toggle('font-medium', !on);
       });
-    };
+    }
 
     setTimeout(() => moveToLink(activeLink), 80);
-    window.addEventListener('resize', () => {
-      activeLink = links.find(l => l.dataset.section === nav.dataset.active) || null;
-      moveToLink(activeLink);
-    });
+    window.addEventListener('resize', () => moveToLink(activeLink));
     links.forEach(l => l.addEventListener('mouseenter', () => moveToLink(l)));
     nav.addEventListener('mouseleave', () => {
-      activeLink = links.find(l => l.dataset.section === nav.dataset.active) || null;
       if (activeLink) { moveToLink(activeLink); return; }
       pill.style.opacity = '0';
       links.forEach(l => { l.classList.remove('text-primary', 'font-semibold'); l.classList.add('text-on-surface-variant', 'font-medium'); });
+    });
+
+    if (activeLink) activeLink.addEventListener('click', function (e) {
+      const href = this.getAttribute('href');
+      if (href && href.indexOf('#') === -1 && href === window.location.pathname) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     });
   }
 
@@ -561,7 +513,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const mobileNav = document.getElementById('mobile-nav');
   const mobileLiquidPill = document.getElementById('mobile-liquid-pill');
   let activeMobileLink = null;
-  let moveMobilePill = null;
 
   if (mobileNav && mobileLiquidPill) {
     const mobileLinks = Array.from(mobileNav.querySelectorAll('.mobile-glass-link'));
@@ -570,7 +521,7 @@ document.addEventListener('DOMContentLoaded', function () {
     activeMobileLink = mobileLinks.find(l => l.dataset.section === targetSection) || mobileLinks[0];
     let mobileMorphTimeout = null;
 
-    moveMobilePill = function (target) {
+    function moveMobilePill(target) {
       if (!target) return;
       mobileLiquidPill.classList.add('is-morphing');
       clearTimeout(mobileMorphTimeout);
@@ -596,10 +547,16 @@ document.addEventListener('DOMContentLoaded', function () {
           icon.classList.toggle('text-primary', on);
         }
       });
-    };
+    }
 
     setTimeout(() => moveMobilePill(activeMobileLink), 100);
     window.addEventListener('resize', () => moveMobilePill(activeMobileLink));
+
+    mobileLinks.forEach(l => {
+      l.addEventListener('click', function () {
+        moveMobilePill(l);
+      });
+    });
   }
 
   // ==============================================================
@@ -612,9 +569,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function openBottomSheet() {
     if (!mobileBottomSheet || !mobileSheetBackdrop) return;
-    if (typeof moveMobilePill === 'function' && mobileSheetOpenBtn) {
-      moveMobilePill(mobileSheetOpenBtn);
-    }
     mobileBottomSheet.classList.remove('translate-y-full', 'opacity-0');
     mobileBottomSheet.classList.add('translate-y-0', 'opacity-100');
     mobileSheetBackdrop.classList.remove('opacity-0', 'pointer-events-none');
@@ -631,9 +585,10 @@ document.addEventListener('DOMContentLoaded', function () {
     document.body.classList.remove('overflow-hidden');
 
     // Kembalikan posisi pill ke menu aktif halaman saat ini
-    if (activeMobileLink && typeof moveMobilePill === 'function') {
+    if (typeof activeMobileLink !== 'undefined' && activeMobileLink) {
+      const mobileNav = document.getElementById('mobile-nav');
       const isLainnya = ['omk', 'donasi', 'lainnya'].includes(mobileNav ? mobileNav.dataset.active : '');
-      if (!isLainnya) {
+      if (!isLainnya && typeof moveMobilePill === 'function') {
         setTimeout(() => moveMobilePill(activeMobileLink), 150);
       }
     }
@@ -669,7 +624,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function openPortalSidebar() {
     if (!portalSidebar || !portalBackdrop) return;
-    closeBottomSheet();
+    closeBottomSheet(); // Tutup bottom sheet jika sedang terbuka
     portalSidebar.classList.remove('translate-x-full');
     portalBackdrop.classList.remove('opacity-0', 'pointer-events-none');
     portalBackdrop.classList.add('opacity-100', 'pointer-events-auto');
@@ -685,8 +640,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   if (openPortalSidebarBtn) openPortalSidebarBtn.addEventListener('click', openPortalSidebar);
-  if (openPortalAvatarBtn) openPortalAvatarBtn.addEventListener('click', function (e) {
-    e.preventDefault();
+  if (openPortalAvatarBtn) openPortalAvatarBtn.addEventListener('click', openPortalAvatarBtn => {
+    openPortalAvatarBtn.preventDefault();
     openPortalSidebar();
   });
   if (sheetOpenPortalBtn) sheetOpenPortalBtn.addEventListener('click', openPortalSidebar);
@@ -695,266 +650,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (portalCloseBtn) portalCloseBtn.addEventListener('click', closePortalSidebar);
   if (portalBackdrop) portalBackdrop.addEventListener('click', closePortalSidebar);
 
-  // ==============================================================
-  // 5. ANIMASI GESER PERPINDAHAN HALAMAN (PAGE SLIDE TRANSITIONS)
-  //    — Robust rapid-navigation: AbortController + navId guard
-  // ==============================================================
-  const PAGE_ORDER = {
-    '/': 1,
-    '/jadwal-misa': 2,
-    '/warta-paroki': 3,
-    '/pelayanan-sakramen': 4,
-    '/profil-omk': 5,
-    '/persembahan-donasi': 6,
-    '/portal-umat/login': 7,
-    '/portal-umat/daftar': 8
-  };
-
-  const progressBar = document.getElementById('page-progress-bar');
-  const pageWrapper = document.getElementById('page-wrapper');
-
-  // Incremented on every navigation; lets stale responses self-discard
-  let navCounter = 0;
-  // The AbortController for the in-flight fetch (if any)
-  let currentFetchCtrl = null;
-  // URL queued while a transition is active; we navigate there when done
-  let pendingNavUrl = null;
-  // True while content-swap + CSS animation is running
-  let isTransitioning = false;
-
-  function setProgress(percent, show = true) {
-    if (!progressBar) return;
-    if (show) progressBar.style.opacity = '1';
-    progressBar.style.width = percent + '%';
-    if (percent >= 100) {
-      setTimeout(() => {
-        progressBar.style.opacity = '0';
-        setTimeout(() => { progressBar.style.width = '0%'; }, 260);
-      }, 160);
-    }
-  }
-
-  // Reset wrapper to neutral visible state immediately (sync, no animation)
-  function resetWrapper() {
-    if (!pageWrapper) return;
-    pageWrapper.style.transition = 'none';
-    pageWrapper.classList.remove('slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right');
-    pageWrapper.classList.add('slide-active');
-    void pageWrapper.offsetWidth; // flush
-    pageWrapper.style.transition = '';
-  }
-
-  async function navigateTo(targetUrlString, pushState = true) {
-    const targetUrl = new URL(targetUrlString, window.location.origin);
-
-    // Same page (no hash) → scroll to top
-    if (
-      targetUrl.pathname === window.location.pathname &&
-      targetUrl.search === window.location.search &&
-      !targetUrl.hash
-    ) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-
-    // If a transition is already running, cancel the in-flight fetch and
-    // remember this URL as the next destination. The running transition's
-    // finally-block will pick it up.
-    if (isTransitioning) {
-      pendingNavUrl = targetUrlString;
-      if (currentFetchCtrl) {
-        currentFetchCtrl.abort();
-        currentFetchCtrl = null;
-      }
-      return;
-    }
-
-    isTransitioning = true;
-    pendingNavUrl = null;
-    const myNavId = ++navCounter;
-
-    setProgress(30);
-
-    const currPath = window.location.pathname.replace(/\/+$/, '') || '/';
-    const targetPath = targetUrl.pathname.replace(/\/+$/, '') || '/';
-    const isForward = (PAGE_ORDER[targetPath] || 0) >= (PAGE_ORDER[currPath] || 0);
-
-    // Close any open overlays
-    closeBottomSheet();
-    closePortalSidebar();
-
-    // --- Slide out current page ---
-    if (pageWrapper) {
-      pageWrapper.classList.remove('slide-active', 'slide-in-left', 'slide-in-right');
-      pageWrapper.classList.add(isForward ? 'slide-out-left' : 'slide-out-right');
-    }
-
-    try {
-      setProgress(60);
-      currentFetchCtrl = new AbortController();
-      const res = await fetch(targetUrl.href, {
-        signal: currentFetchCtrl.signal,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      });
-      currentFetchCtrl = null;
-
-      // A newer navigation cancelled us → bail out cleanly
-      if (myNavId !== navCounter) {
-        resetWrapper();
-        return;
-      }
-
-      if (!res.ok) {
-        window.location.href = targetUrl.href;
-        return;
-      }
-
-      const html = await res.text();
-
-      // Check again after the (potentially slow) text() read
-      if (myNavId !== navCounter) {
-        resetWrapper();
-        return;
-      }
-
-      const parser = new DOMParser();
-      const newDoc = parser.parseFromString(html, 'text/html');
-      const newWrapper = newDoc.getElementById('page-wrapper');
-
-      if (!newWrapper) {
-        window.location.href = targetUrl.href;
-        return;
-      }
-
-      setProgress(85);
-
-      // Brief pause so the slide-out is visible (shortened to 80 ms)
-      await new Promise(r => setTimeout(r, 80));
-
-      // Final staleness check
-      if (myNavId !== navCounter) {
-        resetWrapper();
-        return;
-      }
-
-      // Update title & history
-      document.title = newDoc.title;
-      if (pushState) {
-        history.pushState({ path: targetUrl.href }, '', targetUrl.href);
-      }
-
-      window.scrollTo(0, 0);
-
-      // Sync nav active state
-      const newActive =
-        newDoc.getElementById('main-nav')?.dataset.active ||
-        newDoc.getElementById('mobile-nav')?.dataset.active ||
-        'beranda';
-
-      if (nav) nav.dataset.active = newActive;
-      if (mobileNav) mobileNav.dataset.active = newActive;
-
-      // Move desktop liquid-glass pill
-      if (typeof moveToLink === 'function' && nav) {
-        const dl = Array.from(nav.querySelectorAll('.nav-glass-link'));
-        moveToLink(dl.find(l => l.dataset.section === newActive));
-      }
-
-      // Move mobile liquid-glass pill
-      if (typeof moveMobilePill === 'function' && mobileNav) {
-        const ml = Array.from(mobileNav.querySelectorAll('.mobile-glass-link'));
-        const isLainnya = ['omk', 'donasi', 'lainnya'].includes(newActive);
-        const sec = isLainnya ? 'lainnya' : newActive;
-        activeMobileLink = ml.find(l => l.dataset.section === sec) || ml[0];
-        moveMobilePill(activeMobileLink);
-      }
-
-      // Swap content
-      pageWrapper.innerHTML = newWrapper.innerHTML;
-
-      // --- Slide in new page ---
-      pageWrapper.classList.remove('slide-out-left', 'slide-out-right');
-      pageWrapper.classList.add(isForward ? 'slide-in-right' : 'slide-in-left');
-      void pageWrapper.offsetWidth; // flush reflow
-      pageWrapper.classList.remove('slide-in-left', 'slide-in-right');
-      pageWrapper.classList.add('slide-active');
-
-      // Re-run page-specific scripts
-      newDoc.querySelectorAll('body script:not([src*="cdn.tailwindcss.com"])').forEach(s => {
-        const text = s.textContent || '';
-        if (text.includes('PAGE_ORDER') || text.includes('liquid-glass-pill')) return;
-        const sc = document.createElement('script');
-        sc.textContent = text;
-        document.body.appendChild(sc);
-        setTimeout(() => sc.remove(), 150);
-      });
-
-      document.dispatchEvent(new Event('DOMContentLoaded'));
-      window.dispatchEvent(new CustomEvent('page:swapped', { detail: { path: targetPath } }));
-
-      if (targetUrl.hash) {
-        setTimeout(() => {
-          const el = document.querySelector(targetUrl.hash);
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }, 260);
-      }
-
-      setProgress(100);
-    } catch (err) {
-      currentFetchCtrl = null;
-      // AbortError means a newer click cancelled us — restore state quietly
-      if (err.name === 'AbortError') {
-        resetWrapper();
-        return;
-      }
-      console.error('Page transition error:', err);
-      window.location.href = targetUrl.href;
-    } finally {
-      isTransitioning = false;
-      // If a click arrived while we were busy, honour it now
-      const next = pendingNavUrl;
-      pendingNavUrl = null;
-      if (next) {
-        // small tick so the browser can paint the new content first
-        requestAnimationFrame(() => navigateTo(next, true));
-      }
-    }
-  }
-
-  // Intercept all internal link clicks
-  document.addEventListener('click', function (e) {
-    const link = e.target.closest('a');
-    if (!link) return;
-
-    const href = link.getAttribute('href');
-    if (!href || href.startsWith('#')) return;
-    if (link.target === '_blank' || link.hasAttribute('download')) return;
-    if (href.startsWith('tel:') || href.startsWith('mailto:') || href.startsWith('javascript:')) return;
-    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button !== 0) return;
-
-    try {
-      const url = new URL(link.href, window.location.origin);
-      if (url.origin !== window.location.origin) return;
-      if (url.pathname === window.location.pathname && url.hash) return;
-      e.preventDefault();
-      navigateTo(link.href, true);
-    } catch (_) {}
-  });
-
-  // Browser Back / Forward buttons
-  window.addEventListener('popstate', function () {
-    // Cancel any in-flight fetch so it doesn't overwrite the popstate target
-    if (currentFetchCtrl) {
-      currentFetchCtrl.abort();
-      currentFetchCtrl = null;
-    }
-    isTransitioning = false;
-    pendingNavUrl = null;
-    navCounter++;
-    navigateTo(window.location.href, false);
-  });
-
-  // ESC closes overlays
+  // Keyboard shortcut: ESC menutup sheet & sidebar
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       closeBottomSheet();
