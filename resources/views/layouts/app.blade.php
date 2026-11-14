@@ -65,9 +65,8 @@ tailwind.config = {
 <style>
 /* 1. Desktop Liquid Glass */
 .liquid-nav-container{position:relative;background:rgba(246,242,240,.65);border:1px solid rgba(220,212,210,.85);box-shadow:inset 0 1px 2px rgba(0,0,0,.04),0 2px 8px rgba(88,0,20,.03)}
-.liquid-glass-pill{position:absolute;border-radius:.75rem;pointer-events:none;background:linear-gradient(135deg,rgba(255,255,255,.96) 0%,rgba(255,255,255,.72) 100%);backdrop-filter:blur(16px) saturate(190%);-webkit-backdrop-filter:blur(16px) saturate(190%);border:1px solid #fff;box-shadow:0 4px 14px -1px rgba(122,21,38,.12),0 2px 6px -1px rgba(0,0,0,.04),inset 0 1px 2px #fff,inset 0 -1px 2px rgba(122,21,38,.05);transition:left .4s cubic-bezier(.22,1,.36,1),top .4s cubic-bezier(.22,1,.36,1),width .4s cubic-bezier(.22,1,.36,1),height .4s cubic-bezier(.22,1,.36,1),transform .22s ease,opacity .25s ease;z-index:1}
+.liquid-glass-pill{position:absolute;border-radius:.75rem;pointer-events:none;background:linear-gradient(135deg,rgba(255,255,255,.96) 0%,rgba(255,255,255,.72) 100%);backdrop-filter:blur(16px) saturate(190%);-webkit-backdrop-filter:blur(16px) saturate(190%);border:1px solid #fff;box-shadow:0 4px 14px -1px rgba(122,21,38,.12),0 2px 6px -1px rgba(0,0,0,.04),inset 0 1px 2px #fff,inset 0 -1px 2px rgba(122,21,38,.05);transition:left .38s cubic-bezier(.22,1,.36,1),top .38s cubic-bezier(.22,1,.36,1),width .38s cubic-bezier(.22,1,.36,1),height .38s cubic-bezier(.22,1,.36,1),opacity .25s ease;z-index:1}
 .liquid-glass-pill::before{content:'';position:absolute;inset:1px;border-radius:.75rem;background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,rgba(255,255,255,.12) 60%);pointer-events:none}
-.liquid-glass-pill.is-morphing{transform:scaleX(1.05) scaleY(.95)}
 
 /* 2. Mobile Floating Liquid Glass Bar */
 .mobile-liquid-nav-container {
@@ -87,7 +86,7 @@ tailwind.config = {
   -webkit-backdrop-filter: blur(16px) saturate(200%);
   border: 1px solid #ffffff;
   box-shadow: 0 4px 14px -1px rgba(88, 0, 20, 0.16), 0 2px 6px -1px rgba(0, 0, 0, 0.04), inset 0 1px 2px #fff, inset 0 -1px 2px rgba(88, 0, 20, 0.06);
-  transition: left 0.35s cubic-bezier(.22, 1, .36, 1), top 0.35s cubic-bezier(.22, 1, .36, 1), width 0.35s cubic-bezier(.22, 1, .36, 1), height 0.35s cubic-bezier(.22, 1, .36, 1), transform 0.22s ease, opacity 0.25s ease;
+  transition: left 0.35s cubic-bezier(.22, 1, .36, 1), top 0.35s cubic-bezier(.22, 1, .36, 1), width 0.35s cubic-bezier(.22, 1, .36, 1), height 0.35s cubic-bezier(.22, 1, .36, 1), opacity 0.25s ease;
   z-index: 1;
 }
 .mobile-liquid-glass-pill::before {
@@ -98,18 +97,56 @@ tailwind.config = {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.2) 60%);
   pointer-events: none;
 }
-.mobile-liquid-glass-pill.is-morphing {
-  transform: scaleX(1.08) scaleY(0.92);
-}
 
 /* 3. Bottom Sheet Pop Up Animation */
 #mobile-bottom-sheet {
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
 }
+
+/* 4. Page Slide Transitions & Top Progress Bar */
+#page-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, #580014 0%, #e9c349 50%, #7a1526 100%);
+  z-index: 9999;
+  transition: width 0.22s cubic-bezier(0.2, 0.8, 0.4, 1), opacity 0.25s ease;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(233, 195, 73, 0.7);
+}
+
+#page-wrapper {
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
+}
+/* will-change hanya saat animasi, supaya tidak membuat layer permanen */
+#page-wrapper.is-animating { will-change: transform, opacity; }
+
+/* Keluar: cepat. Masuk (.slide-active): lebih lambat dan lembut */
+.slide-out-left,
+.slide-out-right { transition-duration: 0.18s, 0.18s; opacity: 0; }
+.slide-out-left  { transform: translate3d(-24px, 0, 0); }
+.slide-out-right { transform: translate3d(24px, 0, 0); }
+
+.slide-in-left  { transform: translate3d(-24px, 0, 0); opacity: 0; }
+.slide-in-right { transform: translate3d(24px, 0, 0);  opacity: 0; }
+
+/* none (bukan translateX(0)) supaya elemen fixed/sticky di dalam halaman tidak terpengaruh */
+.slide-active { transform: none; opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  #page-wrapper, .liquid-glass-pill, .mobile-liquid-glass-pill { transition: none !important; }
+  .slide-out-left, .slide-out-right, .slide-in-left, .slide-in-right { transform: none; }
+}
 </style>
 @stack('head')
 </head>
 <body class="bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-secondary-fixed selection:text-primary">
+
+<!-- TOP PROGRESS BAR SAAT PERPINDAHAN HALAMAN -->
+<div id="page-progress-bar" aria-hidden="true"></div>
 
 <!-- HEADER UTAMA -->
 <header class="fixed top-0 w-full z-50 bg-surface/95 backdrop-blur-md shadow-[0_2px_12px_rgba(88,0,20,0.06)] border-b border-outline-variant/30">
@@ -396,9 +433,11 @@ tailwind.config = {
   </nav>
 </div>
 
-<!-- KONTEN HALAMAN -->
-<main class="w-full pt-16 sm:pt-20 pb-24 xl:pb-0 bg-surface min-h-screen">
-  @yield('content')
+<!-- KONTEN HALAMAN DENGAN ANIMASI GESER -->
+<main class="w-full pt-16 sm:pt-20 pb-24 xl:pb-0 bg-surface min-h-screen overflow-x-hidden">
+  <div id="page-wrapper" class="w-full slide-active">
+    @yield('content')
+  </div>
 </main>
 
 <!-- FOOTER HALAMAN -->
@@ -454,183 +493,158 @@ tailwind.config = {
   </div>
 </footer>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
+<script data-layout>
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var norm = function (p) { return p.replace(/\/+$/, '') || '/'; };
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Satu-satunya tempat yang tahu "halaman mana yang sedang tampil".
+  // (location.pathname tidak bisa dipakai: saat tombol Back ditekan, URL sudah berubah
+  //  sebelum isi halaman diganti.)
+  var currentPath = norm(location.pathname);
+  var navBusy = false;
+
   // ==============================================================
-  // 1. DESKTOP LIQUID GLASS NAVIGATION (>= 1280px / xl)
+  // 1. DESKTOP LIQUID GLASS (>= xl)
   // ==============================================================
-  const nav = document.getElementById('main-nav');
-  const pill = document.getElementById('liquid-glass-pill');
+  var nav = $('main-nav');
+  var pill = $('liquid-glass-pill');
+  var navLinks = nav ? Array.prototype.slice.call(nav.querySelectorAll('.nav-glass-link')) : [];
+
+  function paintDesktop(target) {
+    navLinks.forEach(function (l) {
+      var on = l === target;
+      l.classList.toggle('text-primary', on);
+      l.classList.toggle('font-semibold', on);
+      l.classList.toggle('text-on-surface-variant', !on);
+      l.classList.toggle('font-medium', !on);
+    });
+  }
+  function movePill(target) {
+    if (!nav || !pill || !target || nav.offsetParent === null) return;
+    var n = nav.getBoundingClientRect(), r = target.getBoundingClientRect();
+    pill.style.opacity = '1';
+    pill.style.left = (r.left - n.left) + 'px';
+    pill.style.top = (r.top - n.top) + 'px';
+    pill.style.width = r.width + 'px';
+    pill.style.height = r.height + 'px';
+    paintDesktop(target);
+  }
+  // Pill selalu kembali ke menu halaman aktif (dibaca saat dipanggil, bukan disimpan)
+  function syncDesktopPill() {
+    if (!nav || !pill) return;
+    var a = navLinks.find(function (l) { return l.dataset.section === nav.dataset.active; });
+    if (a) { movePill(a); }
+    else { pill.style.opacity = '0'; paintDesktop(null); }
+  }
   if (nav && pill) {
-    const links = Array.from(nav.querySelectorAll('.nav-glass-link'));
-    const activeLink = links.find(l => l.dataset.section === nav.dataset.active) || null;
-    let morphTimeout = null;
-
-    function moveToLink(target) {
-      if (!target) return;
-      pill.classList.add('is-morphing');
-      clearTimeout(morphTimeout);
-      morphTimeout = setTimeout(() => pill.classList.remove('is-morphing'), 220);
-
-      const navRect = nav.getBoundingClientRect();
-      const r = target.getBoundingClientRect();
-      pill.style.opacity = '1';
-      pill.style.left = (r.left - navRect.left) + 'px';
-      pill.style.top = (r.top - navRect.top) + 'px';
-      pill.style.width = r.width + 'px';
-      pill.style.height = r.height + 'px';
-
-      links.forEach(l => {
-        const on = l === target;
-        l.classList.toggle('text-primary', on);
-        l.classList.toggle('font-semibold', on);
-        l.classList.toggle('text-on-surface-variant', !on);
-        l.classList.toggle('font-medium', !on);
-      });
-    }
-
-    setTimeout(() => moveToLink(activeLink), 80);
-    window.addEventListener('resize', () => moveToLink(activeLink));
-    links.forEach(l => l.addEventListener('mouseenter', () => moveToLink(l)));
-    nav.addEventListener('mouseleave', () => {
-      if (activeLink) { moveToLink(activeLink); return; }
-      pill.style.opacity = '0';
-      links.forEach(l => { l.classList.remove('text-primary', 'font-semibold'); l.classList.add('text-on-surface-variant', 'font-medium'); });
-    });
-
-    if (activeLink) activeLink.addEventListener('click', function (e) {
-      const href = this.getAttribute('href');
-      if (href && href.indexOf('#') === -1 && href === window.location.pathname) {
-        e.preventDefault();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    });
+    navLinks.forEach(function (l) { l.addEventListener('mouseenter', function () { movePill(l); }); });
+    nav.addEventListener('mouseleave', syncDesktopPill);
+    window.addEventListener('resize', syncDesktopPill);
+    window.addEventListener('load', syncDesktopPill);   // setelah font selesai dimuat
+    setTimeout(syncDesktopPill, 80);
   }
 
   // ==============================================================
-  // 2. MOBILE FLOATING LIQUID GLASS NAVIGATION & SLIDING PILL (< xl)
+  // 2. MOBILE LIQUID GLASS (< xl)
   // ==============================================================
-  const mobileNav = document.getElementById('mobile-nav');
-  const mobileLiquidPill = document.getElementById('mobile-liquid-pill');
-  let activeMobileLink = null;
+  var mNav = $('mobile-nav');
+  var mPill = $('mobile-liquid-pill');
+  var mLinks = mNav ? Array.prototype.slice.call(mNav.querySelectorAll('.mobile-glass-link')) : [];
 
-  if (mobileNav && mobileLiquidPill) {
-    const mobileLinks = Array.from(mobileNav.querySelectorAll('.mobile-glass-link'));
-    const isLainnya = ['omk', 'donasi', 'lainnya'].includes(mobileNav.dataset.active);
-    const targetSection = isLainnya ? 'lainnya' : mobileNav.dataset.active;
-    activeMobileLink = mobileLinks.find(l => l.dataset.section === targetSection) || mobileLinks[0];
-    let mobileMorphTimeout = null;
-
-    function moveMobilePill(target) {
-      if (!target) return;
-      mobileLiquidPill.classList.add('is-morphing');
-      clearTimeout(mobileMorphTimeout);
-      mobileMorphTimeout = setTimeout(() => mobileLiquidPill.classList.remove('is-morphing'), 220);
-
-      const navRect = mobileNav.getBoundingClientRect();
-      const r = target.getBoundingClientRect();
-      mobileLiquidPill.style.opacity = '1';
-      mobileLiquidPill.style.left = (r.left - navRect.left) + 'px';
-      mobileLiquidPill.style.top = (r.top - navRect.top) + 'px';
-      mobileLiquidPill.style.width = r.width + 'px';
-      mobileLiquidPill.style.height = r.height + 'px';
-
-      mobileLinks.forEach(l => {
-        const on = l === target;
-        l.classList.toggle('text-primary', on);
-        l.classList.toggle('font-bold', on);
-        l.classList.toggle('text-on-surface-variant', !on);
-        l.classList.toggle('font-medium', !on);
-        const icon = l.querySelector('.material-symbols-outlined');
-        if (icon) {
-          icon.classList.toggle('scale-110', on);
-          icon.classList.toggle('text-primary', on);
-        }
-      });
-    }
-
-    setTimeout(() => moveMobilePill(activeMobileLink), 100);
-    window.addEventListener('resize', () => moveMobilePill(activeMobileLink));
-
-    mobileLinks.forEach(l => {
-      l.addEventListener('click', function () {
-        moveMobilePill(l);
-      });
+  function mobileTargetFor(section) {
+    if (!section || section === 'none') return null;
+    var sec = ['omk', 'donasi', 'lainnya'].indexOf(section) > -1 ? 'lainnya' : section;
+    return mLinks.find(function (l) { return l.dataset.section === sec; }) || null;
+  }
+  function paintMobile(target) {
+    mLinks.forEach(function (l) {
+      var on = l === target;
+      l.classList.toggle('text-primary', on);
+      l.classList.toggle('font-bold', on);
+      l.classList.toggle('text-on-surface-variant', !on);
+      l.classList.toggle('font-medium', !on);
+      var icon = l.querySelector('.material-symbols-outlined');
+      if (icon) { icon.classList.toggle('scale-110', on); icon.classList.toggle('text-primary', on); }
     });
+  }
+  function moveMobile(target) {
+    if (!mNav || !mPill || !target || mNav.offsetParent === null) return;
+    var n = mNav.getBoundingClientRect(), r = target.getBoundingClientRect();
+    mPill.style.opacity = '1';
+    mPill.style.left = (r.left - n.left) + 'px';
+    mPill.style.top = (r.top - n.top) + 'px';
+    mPill.style.width = r.width + 'px';
+    mPill.style.height = r.height + 'px';
+    paintMobile(target);
+  }
+  function syncMobilePill() {
+    if (!mNav || !mPill) return;
+    var t = mobileTargetFor(mNav.dataset.active);
+    if (t) { moveMobile(t); }
+    else { mPill.style.opacity = '0'; paintMobile(null); }
+  }
+  if (mNav && mPill) {
+    window.addEventListener('resize', syncMobilePill);
+    window.addEventListener('load', syncMobilePill);
+    setTimeout(syncMobilePill, 100);
   }
 
   // ==============================================================
-  // 3. BOTTOM SHEET "LAINNYA" (POP UP KE ATAS)
+  // 3. BOTTOM SHEET "LAINNYA"
   // ==============================================================
-  const mobileSheetOpenBtn = document.getElementById('mobile-sheet-open-btn');
-  const mobileBottomSheet = document.getElementById('mobile-bottom-sheet');
-  const mobileSheetBackdrop = document.getElementById('mobile-sheet-backdrop');
-  const mobileSheetCloseBtn = document.getElementById('mobile-sheet-close-btn');
+  var sheet = $('mobile-bottom-sheet');
+  var sheetBackdrop = $('mobile-sheet-backdrop');
+  var sheetOpenBtn = $('mobile-sheet-open-btn');
+  var sheetCloseBtn = $('mobile-sheet-close-btn');
+
+  function sheetIsOpen() { return !!sheet && sheet.classList.contains('translate-y-0'); }
 
   function openBottomSheet() {
-    if (!mobileBottomSheet || !mobileSheetBackdrop) return;
-    mobileBottomSheet.classList.remove('translate-y-full', 'opacity-0');
-    mobileBottomSheet.classList.add('translate-y-0', 'opacity-100');
-    mobileSheetBackdrop.classList.remove('opacity-0', 'pointer-events-none');
-    mobileSheetBackdrop.classList.add('opacity-100', 'pointer-events-auto');
+    if (!sheet || !sheetBackdrop) return;
+    if (sheetOpenBtn) moveMobile(sheetOpenBtn);
+    sheet.classList.remove('translate-y-full', 'opacity-0');
+    sheet.classList.add('translate-y-0', 'opacity-100');
+    sheetBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+    sheetBackdrop.classList.add('opacity-100', 'pointer-events-auto');
     document.body.classList.add('overflow-hidden');
   }
-
-  function closeBottomSheet() {
-    if (!mobileBottomSheet || !mobileSheetBackdrop) return;
-    mobileBottomSheet.classList.add('translate-y-full', 'opacity-0');
-    mobileBottomSheet.classList.remove('translate-y-0', 'opacity-100');
-    mobileSheetBackdrop.classList.remove('opacity-100', 'pointer-events-auto');
-    mobileSheetBackdrop.classList.add('opacity-0', 'pointer-events-none');
+  // syncPill=false dipakai saat pindah halaman: pill akan dipindah sekali oleh navigasi.
+  function closeBottomSheet(syncPill) {
+    if (!sheet || !sheetBackdrop) return;
+    sheet.classList.add('translate-y-full', 'opacity-0');
+    sheet.classList.remove('translate-y-0', 'opacity-100');
+    sheetBackdrop.classList.remove('opacity-100', 'pointer-events-auto');
+    sheetBackdrop.classList.add('opacity-0', 'pointer-events-none');
     document.body.classList.remove('overflow-hidden');
-
-    // Kembalikan posisi pill ke menu aktif halaman saat ini
-    if (typeof activeMobileLink !== 'undefined' && activeMobileLink) {
-      const mobileNav = document.getElementById('mobile-nav');
-      const isLainnya = ['omk', 'donasi', 'lainnya'].includes(mobileNav ? mobileNav.dataset.active : '');
-      if (!isLainnya && typeof moveMobilePill === 'function') {
-        setTimeout(() => moveMobilePill(activeMobileLink), 150);
-      }
+    if (syncPill !== false) {
+      setTimeout(function () { if (!sheetIsOpen() && !navBusy) syncMobilePill(); }, 150);
     }
   }
-
-  if (mobileSheetOpenBtn) {
-    mobileSheetOpenBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      openBottomSheet();
-    });
-  }
-  if (mobileSheetCloseBtn) mobileSheetCloseBtn.addEventListener('click', closeBottomSheet);
-  if (mobileSheetBackdrop) mobileSheetBackdrop.addEventListener('click', closeBottomSheet);
-
-  // Tutup sheet jika link di dalamnya diklik
-  const sheetLinks = document.querySelectorAll('.sheet-link');
-  sheetLinks.forEach(link => {
-    link.addEventListener('click', function () {
-      closeBottomSheet();
-    });
+  if (sheetOpenBtn) sheetOpenBtn.addEventListener('click', function (e) { e.stopPropagation(); openBottomSheet(); });
+  if (sheetCloseBtn) sheetCloseBtn.addEventListener('click', function () { closeBottomSheet(); });
+  if (sheetBackdrop) sheetBackdrop.addEventListener('click', function () { closeBottomSheet(); });
+  document.querySelectorAll('.sheet-link').forEach(function (a) {
+    a.addEventListener('click', function () { closeBottomSheet(); });
   });
 
   // ==============================================================
-  // 4. SIDEBAR KHUSUS PORTAL UMAT (SLIDE DARI KANAN)
+  // 4. SIDEBAR PORTAL UMAT
   // ==============================================================
-  const portalSidebar = document.getElementById('portal-umat-sidebar');
-  const portalBackdrop = document.getElementById('portal-umat-backdrop');
-  const portalCloseBtn = document.getElementById('portal-sidebar-close');
-  const openPortalSidebarBtn = document.getElementById('open-portal-sidebar-btn');
-  const openPortalAvatarBtn = document.getElementById('open-portal-avatar-btn');
-  const sheetOpenPortalBtn = document.getElementById('sheet-open-portal-btn');
-  const openPortalTriggers = document.querySelectorAll('.open-portal-trigger');
+  var portalSidebar = $('portal-umat-sidebar');
+  var portalBackdrop = $('portal-umat-backdrop');
 
   function openPortalSidebar() {
     if (!portalSidebar || !portalBackdrop) return;
-    closeBottomSheet(); // Tutup bottom sheet jika sedang terbuka
+    closeBottomSheet(false);
     portalSidebar.classList.remove('translate-x-full');
     portalBackdrop.classList.remove('opacity-0', 'pointer-events-none');
     portalBackdrop.classList.add('opacity-100', 'pointer-events-auto');
     document.body.classList.add('overflow-hidden');
   }
-
   function closePortalSidebar() {
     if (!portalSidebar || !portalBackdrop) return;
     portalSidebar.classList.add('translate-x-full');
@@ -638,26 +652,207 @@ document.addEventListener('DOMContentLoaded', function () {
     portalBackdrop.classList.add('opacity-0', 'pointer-events-none');
     document.body.classList.remove('overflow-hidden');
   }
-
-  if (openPortalSidebarBtn) openPortalSidebarBtn.addEventListener('click', openPortalSidebar);
-  if (openPortalAvatarBtn) openPortalAvatarBtn.addEventListener('click', openPortalAvatarBtn => {
-    openPortalAvatarBtn.preventDefault();
-    openPortalSidebar();
+  ['open-portal-sidebar-btn', 'sheet-open-portal-btn'].forEach(function (id) {
+    var b = $(id); if (b) b.addEventListener('click', openPortalSidebar);
   });
-  if (sheetOpenPortalBtn) sheetOpenPortalBtn.addEventListener('click', openPortalSidebar);
-  openPortalTriggers.forEach(btn => btn.addEventListener('click', openPortalSidebar));
-
-  if (portalCloseBtn) portalCloseBtn.addEventListener('click', closePortalSidebar);
+  var avatar = $('open-portal-avatar-btn');
+  if (avatar) avatar.addEventListener('click', function (e) { e.preventDefault(); openPortalSidebar(); });
+  document.querySelectorAll('.open-portal-trigger').forEach(function (b) { b.addEventListener('click', openPortalSidebar); });
+  var portalClose = $('portal-sidebar-close');
+  if (portalClose) portalClose.addEventListener('click', closePortalSidebar);
   if (portalBackdrop) portalBackdrop.addEventListener('click', closePortalSidebar);
 
-  // Keyboard shortcut: ESC menutup sheet & sidebar
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') {
-      closeBottomSheet();
-      closePortalSidebar();
-    }
+    if (e.key === 'Escape') { closeBottomSheet(); closePortalSidebar(); }
   });
-});
+
+  // ==============================================================
+  // 5. TRANSISI HALAMAN (geser + progress bar)
+  //    Satu-satunya pemasangan listener klik. Tidak ada re-dispatch DOMContentLoaded.
+  // ==============================================================
+  var PAGE_ORDER = {
+    '/': 1, '/jadwal-misa': 2, '/warta-paroki': 3, '/pelayanan-sakramen': 4,
+    '/profil-omk': 5, '/persembahan-donasi': 6, '/portal-umat/login': 7, '/portal-umat/daftar': 8
+  };
+  var OUT_MS = 180;
+
+  var bar = $('page-progress-bar');
+  var wrapper = $('page-wrapper');
+  var navCounter = 0;      // naik tiap navigasi; respons lama otomatis dibuang
+  var ctrl = null;         // fetch yang sedang berjalan
+  var animTimer = null;
+
+  function setProgress(pct) {
+    if (!bar) return;
+    bar.style.opacity = '1';
+    bar.style.width = pct + '%';
+    if (pct >= 100) {
+      setTimeout(function () {
+        bar.style.opacity = '0';
+        setTimeout(function () { bar.style.width = '0%'; }, 260);
+      }, 160);
+    }
+  }
+
+  function startOut(forward) {
+    clearTimeout(animTimer);
+    wrapper.classList.add('is-animating');
+    wrapper.classList.remove('slide-active', 'slide-in-left', 'slide-in-right', 'slide-out-left', 'slide-out-right');
+    wrapper.classList.add(forward ? 'slide-out-left' : 'slide-out-right');
+  }
+
+  // Posisi awal "masuk" dipasang TANPA transisi, baru dianimasikan ke posisi normal.
+  // (Kalau transisi aktif saat memasang posisi awal, halaman baru muncul dari sisi yang salah
+  //  lalu memantul balik. Itu penyebab utama efek "kepental".)
+  function playEnter(forward) {
+    wrapper.style.transition = 'none';
+    wrapper.classList.remove('slide-out-left', 'slide-out-right', 'slide-active');
+    wrapper.classList.add(forward ? 'slide-in-right' : 'slide-in-left');
+    void wrapper.offsetWidth;
+    wrapper.style.transition = '';
+    wrapper.classList.remove('slide-in-left', 'slide-in-right');
+    wrapper.classList.add('slide-active');
+    clearTimeout(animTimer);
+    animTimer = setTimeout(function () { wrapper.classList.remove('is-animating'); }, 450);
+  }
+
+  function cancelInflight() {
+    navCounter++;
+    if (ctrl) { ctrl.abort(); ctrl = null; }
+    navBusy = false;
+    wrapper.classList.remove('slide-out-left', 'slide-out-right');
+    wrapper.classList.add('slide-active');
+    clearTimeout(animTimer);
+    animTimer = setTimeout(function () { wrapper.classList.remove('is-animating'); }, 450);
+    setProgress(100);
+  }
+
+  // Menjalankan script khusus halaman (@push('scripts')) setelah isi diganti.
+  // Script halaman memakai DOMContentLoaded, yang tidak akan terjadi lagi, jadi handler
+  // dijalankan langsung selama script itu dieksekusi.
+  function runPageScript(text) {
+    var orig = document.addEventListener;
+    document.addEventListener = function (type, fn, opts) {
+      if (type === 'DOMContentLoaded') {
+        try { fn.call(document, new Event('DOMContentLoaded')); } catch (e) { console.error(e); }
+        return;
+      }
+      return orig.call(document, type, fn, opts);
+    };
+    try {
+      var sc = document.createElement('script');
+      sc.textContent = text;
+      document.body.appendChild(sc);
+      sc.remove();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      delete document.addEventListener;
+    }
+  }
+
+  async function navigateTo(href, pushState) {
+    var url = new URL(href, location.origin);
+    var tgt = norm(url.pathname);
+
+    // Halaman yang sama (tanpa hash): batalkan navigasi yang sedang jalan, lalu gulir ke atas
+    if (tgt === currentPath && url.search === location.search && !url.hash) {
+      if (navBusy) cancelInflight();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    if (!wrapper) { window.location.href = url.href; return; }
+
+    var id = ++navCounter;
+    if (ctrl) ctrl.abort();
+    var myCtrl = ctrl = new AbortController();
+    navBusy = true;
+
+    var forward = (PAGE_ORDER[tgt] || 0) >= (PAGE_ORDER[currentPath] || 0);
+
+    setProgress(30);
+    closeBottomSheet(false);
+    closePortalSidebar();
+    startOut(forward);
+
+    try {
+      setProgress(60);
+      var fetched = fetch(url.href, { signal: myCtrl.signal, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function (res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.text(); });
+      // Isi baru baru dipasang setelah animasi keluar selesai (tidak lagi di tengah-tengah)
+      var waited = new Promise(function (r) { setTimeout(r, reduceMotion ? 0 : OUT_MS); });
+      var results = await Promise.all([fetched, waited]);
+      if (id !== navCounter) return;           // ada klik yang lebih baru, biarkan dia yang lanjut
+
+      var doc = new DOMParser().parseFromString(results[0], 'text/html');
+      var newWrapper = doc.getElementById('page-wrapper');
+      if (!newWrapper) { window.location.href = url.href; return; }
+      setProgress(85);
+
+      document.title = doc.title;
+      if (pushState) history.pushState({ path: url.href }, '', url.href);
+      currentPath = tgt;
+
+      // 'instant' mengalahkan scroll-behavior: smooth di CSS (kalau tidak, halaman baru
+      // ikut "menggulung" dari posisi lama saat masuk)
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+
+      var active =
+        (doc.getElementById('main-nav') && doc.getElementById('main-nav').dataset.active) ||
+        (doc.getElementById('mobile-nav') && doc.getElementById('mobile-nav').dataset.active) ||
+        'beranda';
+      if (nav) nav.dataset.active = active;
+      if (mNav) mNav.dataset.active = active;
+
+      wrapper.innerHTML = newWrapper.innerHTML;
+      playEnter(forward);
+      syncDesktopPill();
+      syncMobilePill();
+
+      doc.querySelectorAll('body script').forEach(function (s) {
+        if (s.src || s.hasAttribute('data-layout')) return;
+        var text = s.textContent || '';
+        if (text.trim()) runPageScript(text);
+      });
+      window.dispatchEvent(new CustomEvent('page:swapped', { detail: { path: tgt } }));
+
+      if (url.hash) {
+        setTimeout(function () {
+          var el = document.querySelector(url.hash);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 120);
+      }
+      setProgress(100);
+    } catch (err) {
+      if (err && err.name === 'AbortError') return;   // digantikan navigasi yang lebih baru
+      console.error('Page transition error:', err);
+      window.location.href = url.href;                 // jalan terakhir: muat penuh
+    } finally {
+      if (id === navCounter) { navBusy = false; ctrl = null; }
+    }
+  }
+
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest && e.target.closest('a');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href || href.charAt(0) === '#') return;
+    if (link.target === '_blank' || link.hasAttribute('download') || link.hasAttribute('data-no-ajax')) return;
+    if (/^(tel:|mailto:|javascript:)/.test(href)) return;
+    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    var url;
+    try { url = new URL(link.href, location.origin); } catch (_) { return; }
+    if (url.origin !== location.origin) return;
+    // Hash di halaman yang sedang tampil: biarkan browser menggulung sendiri
+    if (norm(url.pathname) === currentPath && url.hash) return;
+    e.preventDefault();
+    navigateTo(link.href, true);
+  });
+
+  window.addEventListener('popstate', function () {
+    navigateTo(location.href, false);
+  });
+})();
 </script>
 @stack('scripts')
 </body>
