@@ -12,7 +12,8 @@
       "dest": "/public/build/$1"
     },
     {
-      "handle": "filesystem"
+      "src": "/(.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|css|js|woff|woff2|ttf|eot|pdf|mp4|txt|xml))",
+      "dest": "/public/$1"
     },
     {
       "src": "/(.*)",
