@@ -5,7 +5,7 @@
 
 @php
   $wa = 'https://wa.me/6281225001925'; // ganti dengan WhatsApp sekretariat asli
-  $tipe = old('login_type', 'kkg');
+  $tipe = old('login_type', 'email');
 @endphp
 
 @section('content')
@@ -31,6 +31,9 @@
           <div class="p-3.5 rounded-2xl bg-secondary-container/40 text-on-secondary-container font-body-sm text-body-sm flex items-start gap-2">
             <span class="material-symbols-outlined text-lg shrink-0">info</span><span>{{ session('info') }}</span>
           </div>
+        @endif
+        @if (session('status'))
+          <div class="p-3.5 rounded-2xl bg-secondary-container/40 text-on-secondary-container font-body-sm text-body-sm">{{ session('status') }}</div>
         @endif
         @if ($errors->any())
           <div class="p-3.5 rounded-2xl bg-error-container text-on-error-container font-body-sm text-body-sm flex items-start gap-2">
